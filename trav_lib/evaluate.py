@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix, classification_report, roc_curve, plot_roc_curve
-from sklearn.metrics import precision_recall_curve, plot_precision_recall_curve
+from sklearn.metrics import precision_recall_curve, plot_precision_recall_curve, roc_auc_score
 
 def get_confusion_matrix(y_true, y_pred):
     """Output confusion matrix formatted as a dataframe with column and row labels"""
@@ -41,10 +41,12 @@ def evaluate_model(model, splits, threshold=0.5, include_train = False):
         names = ['Test']
     
     for X, y, name in zip(Xs, ys, names):
+        
         pred_proba = model.predict_proba(X)[:,1]
-
         pred = (pred_proba >= threshold).astype(np.int8)
 
+        roc_score = roc_auc_score(y, pred_proba)
+        
         print('******************************************************')
         print(f'{name} Metrics, threshold =',threshold)
         print('******************************************************')
@@ -56,7 +58,7 @@ def evaluate_model(model, splits, threshold=0.5, include_train = False):
         print(classification_report(y, pred, digits=3))
 
         print('******************************************************')
-        print('ROC Curve')
+        print(f'ROC Curve, roc_auc = {roc_score:.4f}')
         fig, ax = plt.subplots()
 
         plot_roc_curve(model, X, y, ax=ax)
