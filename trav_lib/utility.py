@@ -11,6 +11,8 @@ import pathlib
 
 import pickle
 import os
+import datetime
+import csv
 
 def notebook_path():
     """Returns the absolute path of the Notebook or None if it cannot be determined
@@ -33,7 +35,6 @@ def notebook_path():
             pass  # There may be stale entries in the runtime directory 
     return None
 
-
 def copy_current_nb(new_name):
     nb = notebook_path()
     if nb:
@@ -42,17 +43,18 @@ def copy_current_nb(new_name):
         print("Current notebook path cannot be determined.")
     return
 
-def output_model(model,predictions,model_dir,metric,notes = ''):
+def output_model(model,predictions,model_dir,cv_metric,notes = ''):
     """Output serialized model, predictions, and notebook used to make model/predictions. Also
     add record to the experiment tracker."""
     
     experiment_log = model_dir / 'experiment_log.csv'
-    cur_time = datetime.datetime.now()
+    cur_date = datetime.datetime.now().date().strftime('%Y-%m-%d')
+    cur_time = datetime.datetime.now().time().strftime('%H:%M')
     
     if not os.path.isfile(experiment_log):
         with open(experiment_log,'w', newline='') as csvfile:
             csvwriter = csv.writer(csvfile)
-            csvwriter.writerow(['Datetime','Model Name','Metric Score', 'Notes'])
+            csvwriter.writerow(['Date','Time','Model Name','CV Score', 'LB Score', 'Notes'])
     
     for i in range(1,1000):
         model_name = model_dir / 'model_{:03d}.pkl'.format(i)
@@ -70,8 +72,9 @@ def output_model(model,predictions,model_dir,metric,notes = ''):
             
             with open(experiment_log, 'a', newline='') as csvfile:
                 csvwriter = csv.writer(csvfile)
-                csvwriter.writerow([cur_time,f'model_{i:03d}',metric,notes])
+                csvwriter.writerow([cur_date,cur_time,f'model_{i:03d}',cv_metric,'',notes])
             
+            print(f'Model_{i:03d} and predictions saved.')
             return
     print('Error: More than 1000 models in folder')
     return
