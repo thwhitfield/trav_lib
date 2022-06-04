@@ -18,6 +18,6 @@ setuptools.setup(
         "seaborn",
         "numpy",
         "sklearn",
-        "notebook"
+        "ipynbname"
     ]
 )
