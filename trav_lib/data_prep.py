@@ -63,4 +63,14 @@ def snake_case(word):
     word = word.lower()
     
     return(word)
-                  
+
+def flatten_multiindex(multiindex):
+    """Flatten a multiindex into a single level.
+    
+    Ex.
+        cols = MultiIndex([('s_2', 1),
+                           ('s_2', 2)])
+        flatten_multiindex(cols)
+            ['s_2_1', 's_2_2']
+        """
+    return ['_'.join([str(e) for e in col]) for col in multiindex.values]
